@@ -118,4 +118,24 @@ export const getUserInforamtion = asyncHandler( async(req, res) => {
   }
  }
 )
+
+// update address
+export const updateAddress = asyncHandler( async(req, res) => {
+  try {
+    const {id} = req.headers;
+    const {address} = req.body;
+
+    await User.findByIdAndUpdate(id, {address: address})
+
+    return res.status(200).json(
+      new apiResponse(200, {},"Address updated successfully..." )
+    )
+  } catch (error) {
+    console.log("ERROR in Internal Server in update address error:  ", error);
+    
+    res
+      .status(500)
+      .json(new apiResponse(500, {}, "Internal Server Error "))
+  }
+})
  
