@@ -87,14 +87,35 @@ export const signInUser = asyncHandler(async (req, res) => {
       );
         res
           .status(200)
-          .json(new apiResponse(200, {user: existingUser, token}, "User login successfully..."));
+          .json(new apiResponse(200, {user: existingUser, token, }, "User login successfully..."));
       } else {
         res.status(400).json(new apiResponse(400, {}, "Inavlid Credentials!"));
       }
     });
   } catch (error) {
+    console.log("ERROR in Internal Server in SignIn user error:  ", error);
+    
     res
       .status(500)
-      .json(new apiResponse(500, {}, "Internal Server Error "), error);
+      .json(new apiResponse(500, {}, "Internal Server Error "));
   }
 });
+
+// getUserInforamtion api
+export const getUserInforamtion = asyncHandler( async(req, res) => {
+ try {
+  const {id}  = req.headers
+
+  const data = await User.findById(id).select("-password")
+
+  return res.status(200).json(data)
+ } catch (error) {
+  console.log("ERROR in Internal Server in get user information error:  ", error);
+    
+    res
+      .status(500)
+      .json(new apiResponse(500, {}, "Internal Server Error "))
+  }
+ }
+)
+ 
