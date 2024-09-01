@@ -73,84 +73,87 @@ export const signInUser = asyncHandler(async (req, res) => {
         .json(new apiResponse(400, {}, "Inavlid Credentials!"));
     }
 
-     await bcrypt.compare(password, existingUser.password, (err, data) => {
+    await bcrypt.compare(password, existingUser.password, (err, data) => {
       if (data) {
-      const authClaims = [
-         {name: existingUser.name},
-         {role: existingUser.role}
-      ]
-        const token = jwt.sign(
-         { authClaims }, 
-         process.env.JWT_SECRET_KEY,
-         {
-            expiresIn : process.env.JWT_EXPIRY_KEY
-         }
-      );
+        const authClaims = [
+          { name: existingUser.name },
+          { role: existingUser.role },
+        ];
+        const token = jwt.sign({ authClaims }, process.env.JWT_SECRET_KEY, {
+          expiresIn: process.env.JWT_EXPIRY_KEY,
+        });
         res
           .status(200)
-          .json(new apiResponse(200, {user: existingUser, token, }, "User login successfully..."));
+          .json(
+            new apiResponse(
+              200,
+              { user: existingUser, token },
+              "User login successfully..."
+            )
+          );
       } else {
         res.status(400).json(new apiResponse(400, {}, "Inavlid Credentials!"));
       }
     });
   } catch (error) {
     console.log("ERROR in Internal Server in SignIn user error:  ", error);
-    
-    res
-      .status(500)
-      .json(new apiResponse(500, {}, "Internal Server Error "));
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
   }
 });
 
 // getUserInforamtion api
-export const getUserInforamtion = asyncHandler( async(req, res) => {
- try {
-  const {id}  = req.headers
+export const getUserInforamtion = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.headers;
 
-  const data = await User.findById(id).select("-password")
+    const data = await User.findById(id).select("-password");
 
-  return res.status(200).json(data)
- } catch (error) {
-  console.log("ERROR in Internal Server in get user information error:  ", error);
-    
-    res
-      .status(500)
-      .json(new apiResponse(500, {}, "Internal Server Error "))
+    return res.status(200).json(data);
+  } catch (error) {
+    console.log(
+      "ERROR in Internal Server in get user information error:  ",
+      error
+    );
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
   }
- }
-)
+});
 
 // update address api
-export const updateAddress = asyncHandler( async(req, res) => {
+export const updateAddress = asyncHandler(async (req, res) => {
   try {
-    const {id} = req.headers;
-    const {address} = req.body;
+    const { id } = req.headers;
+    const { address } = req.body;
 
-    await User.findByIdAndUpdate(id, {address: address})
+    await User.findByIdAndUpdate(id, { address: address });
 
-    return res.status(200).json(
-      new apiResponse(200, {},"Address updated successfully..." )
-    )
+    return res
+      .status(200)
+      .json(new apiResponse(200, {}, "Address updated successfully..."));
   } catch (error) {
     console.log("ERROR in Internal Server in update address error:  ", error);
-    
-    res
-      .status(500)
-      .json(new apiResponse(500, {}, "Internal Server Error "))
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
   }
-})
+});
 
 // addBook api
-export const addBook = asyncHandler( async(req, res)=> {
+export const addBook = asyncHandler(async (req, res) => {
   try {
-    const {id} = req.headers;
-    const user = await User.findById(id)
+    const { id } = req.headers;
+    const user = await User.findById(id);
 
-    if(user.role !== 'admin'){
-
-      return res.status(400).json(
-        new apiResponse(400,{}, "You are not having access to perform admin work!")
-      )
+    if (user.role !== "admin") {
+      return res
+        .status(400)
+        .json(
+          new apiResponse(
+            400,
+            {},
+            "You are not having access to perform admin work!"
+          )
+        );
     }
 
     const book = new Books({
@@ -160,19 +163,40 @@ export const addBook = asyncHandler( async(req, res)=> {
       price: req.body.price,
       desc: req.body.desc,
       language: req.body.language,
-    })
+    });
 
     await book.save();
 
-    res.status(200).json(
-      new apiResponse(200, book, "Book added successfully...")
-    )
-  } catch (error) {
-    console.log("ERROR in Internal Server in update address error:  ", error);
-    
     res
-      .status(500)
-      .json(new apiResponse(500, {}, "Internal Server Error "))
+      .status(200)
+      .json(new apiResponse(200, book, "Book added successfully..."));
+  } catch (error) {
+    console.log("ERROR in Internal Server in addBook  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
   }
-})
- 
+});
+
+// updateBook api
+export const updateBook = asyncHandler(async (req, res) => {
+  try {
+    const { bookid } = req.headers;
+    await Books.findByIdAndUpdate(bookid, {
+      url: req.body.url,
+      title: req.body.title,
+      author: req.body.author,
+      price: req.body.price,
+      desc: req.body.desc,
+      language: req.body.language,
+    });
+
+    //  response
+    return res
+      .status(200)
+      .json(new apiResponse(200, {}, "Book updated successfully..."));
+  } catch (error) {
+    console.log("ERROR in Internal Server in updateBook  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
+  }
+});
