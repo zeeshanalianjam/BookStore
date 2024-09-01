@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.models.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { Books } from "../models/Books.models.js";
 
 // signUp api
 export const signUpUser = asyncHandler(async (req, res) => {
@@ -119,7 +120,7 @@ export const getUserInforamtion = asyncHandler( async(req, res) => {
  }
 )
 
-// update address
+// update address api
 export const updateAddress = asyncHandler( async(req, res) => {
   try {
     const {id} = req.headers;
@@ -129,6 +130,42 @@ export const updateAddress = asyncHandler( async(req, res) => {
 
     return res.status(200).json(
       new apiResponse(200, {},"Address updated successfully..." )
+    )
+  } catch (error) {
+    console.log("ERROR in Internal Server in update address error:  ", error);
+    
+    res
+      .status(500)
+      .json(new apiResponse(500, {}, "Internal Server Error "))
+  }
+})
+
+// addBook api
+export const addBook = asyncHandler( async(req, res)=> {
+  try {
+    const {id} = req.headers;
+    const user = await User.findById(id)
+
+    if(user.role !== 'admin'){
+
+      return res.status(400).json(
+        new apiResponse(400,{}, "You are not having access to perform admin work!")
+      )
+    }
+
+    const book = new Books({
+      url: req.body.url,
+      title: req.body.title,
+      author: req.body.author,
+      price: req.body.price,
+      desc: req.body.desc,
+      language: req.body.language,
+    })
+
+    await book.save();
+
+    res.status(200).json(
+      new apiResponse(200, book, "Book added successfully...")
     )
   } catch (error) {
     console.log("ERROR in Internal Server in update address error:  ", error);
