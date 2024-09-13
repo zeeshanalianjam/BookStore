@@ -200,3 +200,82 @@ export const updateBook = asyncHandler(async (req, res) => {
     res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
   }
 });
+
+// deleteBook api
+export const deleteBook = asyncHandler(async (req, res) => {
+  try {
+    const { bookid } = req.headers;
+   const myBook = await Books.findByIdAndDelete(bookid);
+    // validation of bookid are exist or not
+    if (!myBook) {
+      return res
+       .status(404)
+       .json(new apiResponse(404, {}, "Book not found!"));
+    }
+
+    //  response
+    return res
+      .status(200)
+      .json(new apiResponse(200, {}, "Book deleted successfully..."));
+  } catch (error) {
+    console.log("ERROR in Internal Server in deleteBook  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
+  }
+});
+
+// get all books api
+export const getAllBooks = asyncHandler(async (req, res) => {
+  try {
+    const books = await Books.find({});
+
+    return res.status(200).json(
+      new apiResponse(200, books, "All books fetched successfully...")
+    );
+  } catch (error) {
+    console.log("ERROR in Internal Server in getAllBooks  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
+  }
+});
+
+// get recently added books limit 4 api
+export const getRecentlyAddedBooks = asyncHandler(async (req, res) => {
+  try {
+    const books = await Books.find({})
+     .sort({ createdAt: -1 })
+     .limit(4);
+
+    return res.status(200).json(
+      new apiResponse(200, books, "Recently added books fetched successfully...")
+    );
+  } catch (error) {
+    console.log("ERROR in Internal Server in getRecentlyAddedBooks  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
+  }
+});
+
+// get book by id api
+export const getBookById = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.params;
+    const book = await Books.findById(id);
+
+    // validation of bookid are exist or not
+    if (!book) {
+      return res
+       .status(404)
+       .json(new apiResponse(404, {}, "Book not found! or Invalid id"));
+    }
+
+    //  response
+    return res.status(200).json(
+      new apiResponse(200, book, "Book fetched successfully...")
+    );
+  } catch (error) {
+    console.log("ERROR in Internal Server in getBooksById  error:  ", error);
+
+    res.status(500).json(new apiResponse(500, {}, "Internal Server Error "));
+  }
+});
